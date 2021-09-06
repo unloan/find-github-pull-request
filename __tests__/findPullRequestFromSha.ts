@@ -21,7 +21,7 @@ jest.mock('@actions/core', () => ({
 
 jest.mock('@actions/github', () => ({
   context: {
-    eventName: 'pull',
+    eventName: 'push',
     repo: {
       owner: 'kylorhall',
       repo: 'repo',
