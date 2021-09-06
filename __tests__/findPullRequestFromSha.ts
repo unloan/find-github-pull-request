@@ -2,7 +2,7 @@ import { debug, setFailed, setOutput } from '@actions/core';
 import { getOctokit } from '@actions/github';
 
 import { findPullRequestFromSha } from '../src/findPullRequestFromSha';
-import { pullRequestFactory } from '../jestHelpers';
+import { pullRequestFactory, setMockedInputs } from '../jestHelpers';
 
 export const baseInputs = {
   failIfNotFound: 'false',
@@ -36,18 +36,7 @@ export const runTest = async (
 ) => {
   // We first put all of our inputs into `process.env.INPUT_…` (etc).
   const inputObj = { ...baseInputs, ...inputs };
-  const envKeyPairs = (Object.entries(inputObj) as [string, string][]).map(
-    ([key, value]) => {
-      return [`INPUT_${key.replace(/ /g, '_').toUpperCase()}`, value];
-    }
-  );
-
-  envKeyPairs.forEach(([key, value]) => {
-    // don't set undefined values…
-    if (value !== undefined && value !== null) {
-      process.env[key] = String(value);
-    }
-  });
+  const { deleteMockedInputs } = setMockedInputs(inputObj);
 
   const apiMock = jest.fn(
     async () => new Promise((resolve) => resolve({ data: apiData }))
@@ -69,9 +58,7 @@ export const runTest = async (
   expect(apiMock).toHaveBeenCalledTimes(1);
 
   // Delete all `process.env.INPUT_PACKAGE` we just set.
-  envKeyPairs.forEach(([key]) => {
-    delete process.env[key];
-  });
+  deleteMockedInputs();
 
   return { apiMock, result };
 };

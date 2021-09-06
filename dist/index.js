@@ -6358,7 +6358,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 const findPullRequestFromSha = () => __awaiter(void 0, void 0, void 0, function* () {
     const githubToken = (0,core.getInput)('token', { required: false }); // not required unless for a search
     const allowClosed = (0,core.getBooleanInput)('allowClosed', { required: false });
-    const shouldFail = (0,core.getBooleanInput)('failIfNotFound', { required: false });
+    const failIfNotFound = (0,core.getBooleanInput)('failIfNotFound', { required: false });
     const currentSha = (0,core.getInput)('commitSha', { required: false });
     // To be honest, it shouldn't be able to fail here, due to `{ required: true }` (etc) above.
     if (!githubToken)
@@ -6378,7 +6378,7 @@ const findPullRequestFromSha = () => __awaiter(void 0, void 0, void 0, function*
         (0,core.debug)(`Filtered to find ${pullRequests.length} open pull requests.`);
     }
     if (!pullRequests.length) {
-        if (shouldFail) {
+        if (failIfNotFound) {
             (0,core.setFailed)(`No pull requests found for ${github.context.repo.owner}/${github.context.repo.repo}@${currentSha}, Github Action failed.`);
         }
         return;
@@ -6401,7 +6401,14 @@ const sanitize = (str) => str === null || str === void 0 ? void 0 : str.replace(
 
 const setOutputs = (pullRequest) => {
     if (!(pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.number)) {
-        (0,core.setFailed)(`We did not find a pull request for an event=${github.context.eventName}.`);
+        const failIfNotFound = (0,core.getBooleanInput)('failIfNotFound', {
+            required: false,
+        });
+        const message = `We did not find a pull request for an event=${github.context.eventName}.`;
+        if (failIfNotFound)
+            (0,core.setFailed)(message);
+        else
+            (0,core.debug)(message);
         return;
     }
     // Sanitize the title and body to avoid Shell interpolation of backticks and more.

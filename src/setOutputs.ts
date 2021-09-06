@@ -1,4 +1,4 @@
-import { setOutput, setFailed } from '@actions/core';
+import { debug, getBooleanInput, setOutput, setFailed } from '@actions/core';
 import { context } from '@actions/github';
 
 import { sanitize } from './sanitize';
@@ -7,9 +7,13 @@ import type { PullRequest } from './types';
 
 export const setOutputs = (pullRequest: PullRequest) => {
   if (!pullRequest?.number) {
-    setFailed(
-      `We did not find a pull request for an event=${context.eventName}.`
-    );
+    const failIfNotFound = getBooleanInput('failIfNotFound', {
+      required: false,
+    });
+
+    const message = `We did not find a pull request for an event=${context.eventName}.`;
+    if (failIfNotFound) setFailed(message);
+    else debug(message);
 
     return;
   }

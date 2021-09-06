@@ -4,7 +4,7 @@ import { getOctokit, context } from '@actions/github';
 export const findPullRequestFromSha = async () => {
   const githubToken = getInput('token', { required: false }); // not required unless for a search
   const allowClosed = getBooleanInput('allowClosed', { required: false });
-  const shouldFail = getBooleanInput('failIfNotFound', { required: false });
+  const failIfNotFound = getBooleanInput('failIfNotFound', { required: false });
   const currentSha = getInput('commitSha', { required: false });
 
   // To be honest, it shouldn't be able to fail here, due to `{ required: true }` (etc) above.
@@ -31,7 +31,7 @@ export const findPullRequestFromSha = async () => {
   }
 
   if (!pullRequests.length) {
-    if (shouldFail) {
+    if (failIfNotFound) {
       setFailed(
         `No pull requests found for ${context.repo.owner}/${context.repo.repo}@${currentSha}, Github Action failed.`
       );

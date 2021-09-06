@@ -1,9 +1,15 @@
-import { setFailed, setOutput } from '@actions/core';
+import { debug, setFailed, setOutput } from '@actions/core';
 
 import { setOutputs } from '../src/setOutputs';
-import { pullRequestFactory } from '../jestHelpers';
+import {
+  pullRequestFactory,
+  setMockedInputs,
+  deleteAllMockedInputs,
+} from '../jestHelpers';
 
 jest.mock('@actions/core', () => ({
+  debug: jest.fn(),
+  getBooleanInput: jest.requireActual('@actions/core').getBooleanInput, // use real as we mock it via setMockedInputs
   setFailed: jest.fn(),
   setOutput: jest.fn(),
 }));
@@ -15,6 +21,7 @@ jest.mock('@actions/github', () => ({
 describe('setOutputs', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    deleteAllMockedInputs();
   });
 
   test.each(['body', 'title'])('%p gets sanitized', async (key) => {
@@ -51,23 +58,44 @@ describe('setOutputs', () => {
       );
 
       expect(setFailed).not.toHaveBeenCalled();
+      expect(debug).not.toHaveBeenCalled();
     }
   );
 
-  test.each([undefined, { number: 0 }, {}])(
-    'with a bad pull_request=%p, calls setFailed',
+  describe.each([undefined, { number: 0 }, {}])(
+    'with a bad pull_request=%p',
     (pullRequest) => {
-      expect(setFailed).not.toHaveBeenCalled();
+      test('with inputs.failIfNotFound=false, calls `debug`', () => {
+        expect(debug).not.toHaveBeenCalled();
+        expect(setFailed).not.toHaveBeenCalled();
 
-      setOutputs(pullRequest as any);
+        setMockedInputs({ failIfNotFound: false });
+        setOutputs(pullRequest as any);
 
-      expect(setFailed).toHaveBeenCalledWith(
-        'We did not find a pull request for an event=mocked_event_name.'
-      );
+        expect(debug).toHaveBeenCalledTimes(1);
+        expect(debug).toHaveBeenCalledWith(
+          'We did not find a pull request for an event=mocked_event_name.'
+        );
+        expect(setFailed).not.toHaveBeenCalled();
+      });
+
+      test('with inputs.failIfNotFound=true, calls `setFailed`', () => {
+        expect(debug).not.toHaveBeenCalled();
+        expect(setFailed).not.toHaveBeenCalled();
+
+        setMockedInputs({ failIfNotFound: true });
+        setOutputs(pullRequest as any);
+
+        expect(setFailed).toHaveBeenCalledTimes(1);
+        expect(setFailed).toHaveBeenCalledWith(
+          'We did not find a pull request for an event=mocked_event_name.'
+        );
+        expect(debug).not.toHaveBeenCalled();
+      });
     }
   );
 
-  test('falls back to empty values', () => {
+  test('falls back to empty strings', () => {
     expect(setOutput).not.toHaveBeenCalled();
 
     setOutputs({ number: 42 } as any);
