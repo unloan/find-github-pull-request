@@ -3,6 +3,7 @@ author: kylorhall
 description: Find a Github Pull Request in a Github Action
 branding:
   icon: git-pull-request
+  color: yellow
 
 inputs:
   token:
