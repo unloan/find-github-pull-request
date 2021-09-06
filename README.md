@@ -20,7 +20,7 @@ jobs:
 
       - name: Find Pull Request
         id: find-pr
-        uses: kylorhall/find-github-pull-request@v0.0.4
+        uses: kylorhall/find-github-pull-request@v1.0.0
         with:
           # These are all default values.
           token: ${{ secrets.GITHUB_TOKEN }}
