@@ -6366,7 +6366,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 
 function fetchPullRequest() {
-    var _a, _b;
+    var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function* () {
         const githubToken = (0,core.getInput)('token', { required: true }); // not required in action.yml, but the default should provide
         let currentSha = (0,core.getInput)('commitSha', { required: false });
@@ -6384,23 +6384,17 @@ function fetchPullRequest() {
         if (github.context.eventName === 'pull_request') {
             (0,core.debug)('@@context.payload:');
             (0,core.debug)(JSON.stringify(github.context.payload));
-            currentSha = github.context.payload.head.sha;
+            currentSha = (_c = github.context.payload.head) === null || _c === void 0 ? void 0 : _c.sha;
             targetNumber = github.context.payload.pull_request.number;
         }
         const octokit = (0,github.getOctokit)(githubToken);
-        (0,core.debug)('@@request');
-        (0,core.debug)(JSON.stringify({
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
-            commit_sha: currentSha,
-        }));
         const { data } = yield octokit.rest.repos.listPullRequestsAssociatedWithCommit({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
             commit_sha: currentSha,
         });
         let pullRequests = data;
-        (0,core.debug)(`Found ${pullRequests.length} pull requests.`);
+        (0,core.debug)(`Found ${pullRequests.length} pull requests with the sha ${currentSha}.`);
         if (!allowClosed) {
             pullRequests = pullRequests.filter((pr) => pr.state === 'open');
             (0,core.debug)(`Filtered to find ${pullRequests.length} open pull requests.`);
