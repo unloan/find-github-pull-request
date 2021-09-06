@@ -1,0 +1,37 @@
+name: Find Github Pull Request
+author: kylorhall
+description: Find a Github Pull Request in a Github Action
+branding:
+  icon: git-pull-request
+
+inputs:
+  token:
+    required: false
+    description: Github Token used to make API request to fetch pull requests from the current owner/repo.  Defaults to the built-in token.
+    default: ${{ github.token }}
+  commitSha:
+    required: false
+    description: Commit SHA to find a PR for.  Defaults to the current Github SHA.
+    default: ${{ github.sha }}
+  allowClosed:
+    required: false
+    description: Allow finding closed PRs.  Defaults to false (no).
+    default: 'false'
+  failIfNotFound:
+    required: false
+    description: SHA to find a PR for.  Defaults to false (failing).
+    default: 'false'
+
+outputs:
+  number:
+    description: The found PR number (eg. '1234')
+  title:
+    description: The found PR title, sanitized to be used in a shell environment.
+  body:
+    description: The found PR description, sanitized to be used in a shell environment.
+  url:
+    description: The found PR url.
+
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

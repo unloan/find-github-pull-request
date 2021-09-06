@@ -1,0 +1,27 @@
+name: Comment on Every Pull Request
+
+on: [push, pull_request]
+
+jobs:
+  add-pr-comment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Find Pull Request
+        id: find-pr
+        uses: kylorhall/find-github-pull-request@v0.0.1
+
+      - name: Comment on the found Pull Request
+        if: steps.find-pr.outputs.number != ''
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: comment # basically a key
+          number: ${{ steps.find-pr.outputs.number }}
+          message: |
+            :tada: I added a comment!
+
+             - number: ${{ steps.find-pr.outputs.number }}
+             - title: ${{ steps.find-pr.outputs.title }}
+             - body: ${{ steps.find-pr.outputs.body }}
+             - url: ${{ steps.find-pr.outputs.url }}

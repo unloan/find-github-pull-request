@@ -1,0 +1,38 @@
+{
+  "name": "find-github-pull-request",
+  "version": "0.0.1",
+  "description": "Find a Github Pull Request in a Github Action",
+  "main": "dist/index.js",
+  "author": {
+    "name": "Kylor Hall",
+    "email": "kylor@kylorhall.com",
+    "url": "https://kylorhall.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kylorhall/find-github-pull-request.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kylorhall/find-github-pull-request/issues"
+  },
+  "scripts": {
+    "start": "$(yarn bin ncc) run src/run.ts",
+    "build": "$(yarn bin ncc) build src/run.ts",
+    "jest": "NODE_ENV=test $(yarn bin jest)",
+    "jest:ci": "yarn jest --runInBand --ci --colors --collectCoverage",
+    "jest:tdd": "yarn jest --watch --verbose"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.5.0",
+    "@actions/github": "^5.0.0",
+    "@vercel/ncc": "^0.30.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.1",
+    "@types/node": "^16.7.10",
+    "jest": "^27.1.0",
+    "ts-jest": "^27.0.5",
+    "typescript": "^4.4.2"
+  }
+}
