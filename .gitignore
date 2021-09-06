@@ -1,0 +1,38 @@
+# Logs
+
+logs
+_.log
+npm-debug.log_
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log\*
+
+# Coverage Directories
+
+lib-cov
+coverage
+\*.lcov
+
+# Distribution
+
+dist/
+
+# Dependency directories
+
+node_modules/
+
+# Optional eslint cache
+
+.eslintcache
+
+# Output of 'npm pack'
+
+\*.tgz
+
+# Yarn Integrity file
+
+.yarn-integrity
+
+# VSCode
+
+.vscode/
