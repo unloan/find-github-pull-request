@@ -10,7 +10,7 @@ jobs:
 
       - name: Find Pull Request
         id: find-pr
-        uses: kylorhall/find-github-pull-request@v0.0.1
+        uses: kylorhall/find-github-pull-request@v0.0.3
         with:
           failIfNotFound: true
 

@@ -9,6 +9,7 @@ For a real-world action, this repo runs itself via [add-pr-comment.yml](https://
 ```yaml
 name: Add PR Comment
 
+# NOTE: We support both `push` and `pull_request`, but see the input documentation as they are different.
 on: [push, pull_request]
 
 jobs:
@@ -19,7 +20,7 @@ jobs:
 
       - name: Find Pull Request
         id: find-pr
-        uses: kylorhall/find-github-pull-request@v0.0.1
+        uses: kylorhall/find-github-pull-request@v0.0.3
         with:
           # These are all default values.
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -37,14 +38,16 @@ jobs:
 
 # Inputs
 
-**All inputs are optional.**
+**All inputs are optional and only used for an `on: pull` event!**
 
-| Name           | Description                                       | Example / Default Value |
-| -------------- | ------------------------------------------------- | ----------------------- |
-| token          | Github Token used to fetch pull requests.         | `ghp_Abc123`            |
-| commitSha      | Commit sha to find a PR for, defaults to current. | `abcdef123`             |
-| allowClosed    | Allows finding a closed PR.                       | `false`                 |
-| failIfNotFound | Fail if no matching PRs are found with that sha.  | `false`                 |
+If doing `on: pull_request`, we get this data directly from the payload and inputs are generally ignored…
+
+| Name           | Description                                               | Example / Default Value |
+| -------------- | --------------------------------------------------------- | ----------------------- |
+| token          | Github Token used to fetch pull requests.                 | `ghp_Abc123`            |
+| commitSha      | For `on: pull`, the sha to look for, defaults to current. | `abcdef123`             |
+| allowClosed    | For `on: pull`, allows returning a closed PR.             | `false`                 |
+| failIfNotFound | For `on: pull`, fail if not found at that sha.            | `false`                 |
 
 ---
 

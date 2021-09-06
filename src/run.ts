@@ -1,6 +1,6 @@
 import { setFailed } from '@actions/core';
-import { fetchPullRequest } from './fetchPullRequest';
+import { getPullRequest } from './getPullRequest';
 
-fetchPullRequest().catch((err) => {
+getPullRequest().catch((err) => {
   setFailed(err.message);
 });

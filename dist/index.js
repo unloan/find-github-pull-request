@@ -6343,16 +6343,7 @@ __nccwpck_require__.r(__webpack_exports__);
 var core = __nccwpck_require__(186);
 // EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
 var github = __nccwpck_require__(438);
-;// CONCATENATED MODULE: ./src/sanitize.ts
-/**
- * Sanitize a string to be usable in a shell or bash command.
- *
- * Particularly, a backtick might break if wanting to use in a Github Action bash,
- * Eg. this can break: `echo "PR_TITLE=${{ steps.find-pr.outputs.title }}" >> $GITHUB_ENV`
- */
-const sanitize = (str) => str === null || str === void 0 ? void 0 : str.replace(/['"`]+/g, '');
-
-;// CONCATENATED MODULE: ./src/fetchPullRequest.ts
+;// CONCATENATED MODULE: ./src/findPullRequestFromSha.ts
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -6364,66 +6355,96 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 };
 
 
-
-function fetchPullRequest() {
-    var _a, _b, _c;
-    return __awaiter(this, void 0, void 0, function* () {
-        const githubToken = (0,core.getInput)('token', { required: true }); // not required in action.yml, but the default should provide
-        let currentSha = (0,core.getInput)('commitSha', { required: false });
-        const allowClosed = (0,core.getBooleanInput)('allowClosed', { required: false });
-        const shouldFail = (0,core.getBooleanInput)('failIfNotFound', { required: false });
-        let targetNumber;
-        (0,core.debug)(`context.issue.number: ${(_a = github.context.issue) === null || _a === void 0 ? void 0 : _a.number}`);
-        // @ts-ignore
-        (0,core.debug)(`context.pull_request.number: ${(_b = github.context.pull_request) === null || _b === void 0 ? void 0 : _b.number}`);
-        // To be honest, it shouldn't be able to fail here, due to `{ required: true }` (etc) above.
-        if (!githubToken)
-            (0,core.setFailed)('token is required and not provided');
-        if (!currentSha)
-            (0,core.setFailed)('commitSha is required and not provided');
-        if (github.context.eventName === 'pull_request') {
-            (0,core.debug)('@@context.payload:');
-            (0,core.debug)(JSON.stringify(github.context.payload));
-            currentSha = (_c = github.context.payload.head) === null || _c === void 0 ? void 0 : _c.sha;
-            targetNumber = github.context.payload.pull_request.number;
-        }
-        const octokit = (0,github.getOctokit)(githubToken);
-        const { data } = yield octokit.rest.repos.listPullRequestsAssociatedWithCommit({
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
-            commit_sha: currentSha,
-        });
-        let pullRequests = data;
-        (0,core.debug)(`Found ${pullRequests.length} pull requests with the sha ${currentSha}.`);
-        if (!allowClosed) {
-            pullRequests = pullRequests.filter((pr) => pr.state === 'open');
-            (0,core.debug)(`Filtered to find ${pullRequests.length} open pull requests.`);
-        }
-        if (!(pullRequests === null || pullRequests === void 0 ? void 0 : pullRequests.length)) {
-            if (shouldFail) {
-                (0,core.setFailed)(`No pull requests found for ${github.context.repo.owner}/${github.context.repo.repo}@${currentSha}, Github Action failed.`);
-            }
-            return;
-        }
-        const pullRequest = pullRequests[0];
-        if (targetNumber && pullRequest.number !== targetNumber) {
-            (0,core.setFailed)(`We were looking for PR#${targetNumber}, received PR#${pullRequest.number}.`);
-            return;
-        }
-        // Sanitize the title and body to avoid Shell interpolation of backticks and more.
-        const title = sanitize(pullRequest.title);
-        const body = sanitize(pullRequest.body);
-        (0,core.setOutput)('number', pullRequest.number || '');
-        (0,core.setOutput)('title', title || '');
-        (0,core.setOutput)('body', body || '');
-        (0,core.setOutput)('url', pullRequest.html_url || '');
+const findPullRequestFromSha = () => __awaiter(void 0, void 0, void 0, function* () {
+    const githubToken = (0,core.getInput)('token', { required: false }); // not required unless for a search
+    const allowClosed = (0,core.getBooleanInput)('allowClosed', { required: false });
+    const shouldFail = (0,core.getBooleanInput)('failIfNotFound', { required: false });
+    const currentSha = (0,core.getInput)('commitSha', { required: false });
+    // To be honest, it shouldn't be able to fail here, due to `{ required: true }` (etc) above.
+    if (!githubToken)
+        (0,core.setFailed)('token is required and not provided');
+    if (!currentSha)
+        (0,core.setFailed)('commitSha is required and not provided');
+    const octokit = (0,github.getOctokit)(githubToken);
+    const { data } = yield octokit.rest.repos.listPullRequestsAssociatedWithCommit({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        commit_sha: currentSha,
     });
-}
+    let pullRequests = data;
+    (0,core.debug)(`Found ${pullRequests.length} pull requests with the sha ${currentSha}.`);
+    if (!allowClosed) {
+        pullRequests = pullRequests.filter((pr) => pr.state === 'open');
+        (0,core.debug)(`Filtered to find ${pullRequests.length} open pull requests.`);
+    }
+    if (!pullRequests.length) {
+        if (shouldFail) {
+            (0,core.setFailed)(`No pull requests found for ${github.context.repo.owner}/${github.context.repo.repo}@${currentSha}, Github Action failed.`);
+        }
+        return;
+    }
+    return pullRequests[0];
+});
+
+;// CONCATENATED MODULE: ./src/sanitize.ts
+/**
+ * Sanitize a string to be usable in a shell or bash command.
+ *
+ * Particularly, a backtick might break if wanting to use in a Github Action bash,
+ * Eg. this can break: `echo "PR_TITLE=${{ steps.find-pr.outputs.title }}" >> $GITHUB_ENV`
+ */
+const sanitize = (str) => str === null || str === void 0 ? void 0 : str.replace(/['"`]+/g, '');
+
+;// CONCATENATED MODULE: ./src/setOutputs.ts
+
+
+
+const setOutputs = (pullRequest) => {
+    if (!(pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.number)) {
+        (0,core.setFailed)(`We did not find a pull request for an event=${github.context.eventName}.`);
+        return;
+    }
+    // Sanitize the title and body to avoid Shell interpolation of backticks and more.
+    const title = sanitize(pullRequest.title);
+    const body = sanitize(pullRequest.body);
+    (0,core.setOutput)('number', pullRequest.number);
+    (0,core.setOutput)('title', title || '');
+    (0,core.setOutput)('body', body || '');
+    (0,core.setOutput)('url', pullRequest.html_url || '');
+};
+
+;// CONCATENATED MODULE: ./src/getPullRequest.ts
+var getPullRequest_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+
+
+
+const getPullRequest = () => getPullRequest_awaiter(void 0, void 0, void 0, function* () {
+    let pullRequest;
+    if (github.context.eventName === 'pull_request') {
+        pullRequest = github.context.payload.pull_request;
+    }
+    else if (github.context.eventName === 'push') {
+        pullRequest = yield findPullRequestFromSha();
+    }
+    else {
+        (0,core.setFailed)(`Received an unknown event: ${github.context.eventName}.`);
+    }
+    setOutputs(pullRequest);
+});
 
 ;// CONCATENATED MODULE: ./src/run.ts
 
 
-fetchPullRequest().catch((err) => {
+getPullRequest().catch((err) => {
     (0,core.setFailed)(err.message);
 });
 

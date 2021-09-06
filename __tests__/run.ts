@@ -1,15 +1,15 @@
 import { setFailed } from '@actions/core';
 
-import { fetchPullRequest } from '../src/fetchPullRequest';
+import { getPullRequest } from '../src/getPullRequest';
 
-jest.mock('../src/fetchPullRequest');
+jest.mock('../src/getPullRequest');
 jest.mock('@actions/core', () => ({
   setFailed: jest.fn(),
 }));
 
 describe('run', () => {
-  test('running with `fetchPullRequest` not throwing an error does not call `setFailed`', async () => {
-    (fetchPullRequest as any).mockImplementation(
+  test('running with `getPullRequest` not throwing an error does not call `setFailed`', async () => {
+    (getPullRequest as any).mockImplementation(
       () => new Promise((resolve) => resolve('works!'))
     );
 
@@ -23,9 +23,9 @@ describe('run', () => {
     expect(setFailed).not.toHaveBeenCalled();
   });
 
-  test('running when `fetchPullRequest` throws an error calls `setFailed`', async () => {
+  test('running when `getPullRequest` throws an error calls `setFailed`', async () => {
     const message = 'Everything failed!';
-    (fetchPullRequest as any).mockImplementation(
+    (getPullRequest as any).mockImplementation(
       () => new Promise((_resolve, reject) => reject(new Error(message)))
     );
 

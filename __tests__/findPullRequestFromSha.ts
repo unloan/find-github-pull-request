@@ -1,7 +1,8 @@
 import { debug, setFailed, setOutput } from '@actions/core';
 import { getOctokit } from '@actions/github';
 
-import { fetchPullRequest } from '../src/fetchPullRequest';
+import { findPullRequestFromSha } from '../src/findPullRequestFromSha';
+import { pullRequestFactory } from '../jestHelpers';
 
 export const baseInputs = {
   failIfNotFound: 'false',
@@ -9,22 +10,6 @@ export const baseInputs = {
   commitSha: 'dc45d51',
   token: 'GH_not-a-real-token',
 } as const;
-
-const pullRequestFactory = (number: number, overrides?: object) => ({
-  html_url: `https://github.com/kylorhall/find-github-pull-request/pull/${number}`,
-  number,
-  state: 'open',
-  title: `PR Title for number=${number}`,
-  user: {
-    login: 'kylorhall',
-  },
-  body: `PR Body for number=${number}`,
-  created_at: '2021-09-06T07:08:29Z',
-  updated_at: '2021-09-06T07:11:48Z',
-  closed_at: '2021-09-06T07:08:38Z',
-  merged_at: '2021-09-06T07:08:38Z',
-  ...overrides,
-});
 
 jest.mock('@actions/core', () => ({
   getInput: jest.requireActual('@actions/core').getInput,
@@ -36,6 +21,7 @@ jest.mock('@actions/core', () => ({
 
 jest.mock('@actions/github', () => ({
   context: {
+    eventName: 'pull',
     repo: {
       owner: 'kylorhall',
       repo: 'repo',
@@ -75,10 +61,10 @@ export const runTest = async (
     },
   }));
 
-  await fetchPullRequest();
+  const result = await findPullRequestFromSha();
 
   expect(getOctokit).toHaveBeenCalledTimes(1);
-  expect(getOctokit).toHaveBeenCalledWith(baseInputs.token);
+  expect(getOctokit).toHaveBeenCalledWith(inputObj.token || '');
 
   expect(apiMock).toHaveBeenCalledTimes(1);
 
@@ -87,60 +73,55 @@ export const runTest = async (
     delete process.env[key];
   });
 
-  return { apiMock };
+  return { apiMock, result };
 };
 
-describe('run', () => {
+describe('findPullRequestFromSha', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   test.each([9000, 2, 44])(
-    'returns the first PR in the array (%#)',
+    'returns the first PR in the array (%p)',
     async (number) => {
-      await runTest({}, [
+      const { result } = await runTest({}, [
         pullRequestFactory(number),
         pullRequestFactory(101),
         pullRequestFactory(1),
       ]);
 
       expect(debug).toHaveBeenCalledTimes(2);
-      expect(debug).toHaveBeenCalledWith('Found 3 pull requests.');
+      expect(debug).toHaveBeenCalledWith(
+        `Found 3 pull requests with the sha ${baseInputs.commitSha}.`
+      );
       expect(debug).toHaveBeenCalledWith(
         'Filtered to find 3 open pull requests.'
       );
 
-      expect(setOutput).toHaveBeenCalledTimes(4);
-      // NOTE: This is just testing that it returns the first one, nothing to do with the id.
-      expect(setOutput).toHaveBeenCalledWith('number', number);
-      expect(setOutput).toHaveBeenCalledWith(
-        'title',
-        `PR Title for number=${number}`
-      );
-      expect(setOutput).toHaveBeenCalledWith(
-        'body',
-        `PR Body for number=${number}`
-      );
-      expect(setOutput).toHaveBeenCalledWith(
-        'url',
+      expect(result.number).toEqual(number);
+      expect(result.html_url).toEqual(
         `https://github.com/kylorhall/find-github-pull-request/pull/${number}`
       );
-
-      expect(setFailed).not.toHaveBeenCalled();
     }
   );
 
-  test.each(['body', 'title'])('%p gets sanitized', async (key) => {
-    const rawString = "This' is a `safe` string!";
-    const expected = 'This is a safe string!';
-    await runTest({}, [pullRequestFactory(1, { [key]: rawString })]);
+  test.each(['token', 'commitSha'])(
+    'fails when called withput inputs.%p',
+    async (key) => {
+      await runTest({ [key]: undefined }, []);
 
-    expect(setOutput).toHaveBeenCalledWith(key, expected);
-  });
+      expect(setOutput).not.toHaveBeenCalled();
+
+      expect(setFailed).toHaveBeenCalledTimes(1);
+      expect(setFailed).toHaveBeenCalledWith(
+        `${key} is required and not provided`
+      );
+    }
+  );
 
   describe('allowClosed', () => {
     test('set to true, does not filter the list of pull requests', async () => {
-      await runTest({ allowClosed: 'true' }, [
+      const { result } = await runTest({ allowClosed: 'true' }, [
         pullRequestFactory(1, { state: 'closed' }),
         pullRequestFactory(2, { state: 'closed' }),
         pullRequestFactory(3, { state: 'open' }),
@@ -149,13 +130,15 @@ describe('run', () => {
       ]);
 
       expect(debug).toHaveBeenCalledTimes(1);
-      expect(debug).toHaveBeenCalledWith('Found 5 pull requests.');
+      expect(debug).toHaveBeenCalledWith(
+        `Found 5 pull requests with the sha ${baseInputs.commitSha}.`
+      );
 
-      expect(setOutput).toHaveBeenCalledWith('number', 1);
+      expect(result.number).toEqual(1);
     });
 
     test('set to false (default), filters out closed pull requests', async () => {
-      await runTest({ allowClosed: 'false' }, [
+      const { result } = await runTest({ allowClosed: 'false' }, [
         pullRequestFactory(1, { state: 'closed' }),
         pullRequestFactory(2, { state: 'closed' }),
         pullRequestFactory(3, { state: 'open' }),
@@ -164,12 +147,14 @@ describe('run', () => {
       ]);
 
       expect(debug).toHaveBeenCalledTimes(2);
-      expect(debug).toHaveBeenCalledWith('Found 5 pull requests.');
+      expect(debug).toHaveBeenCalledWith(
+        `Found 5 pull requests with the sha ${baseInputs.commitSha}.`
+      );
       expect(debug).toHaveBeenCalledWith(
         'Filtered to find 2 open pull requests.'
       );
 
-      expect(setOutput).toHaveBeenCalledWith('number', 3);
+      expect(result.number).toEqual(3);
     });
   });
 

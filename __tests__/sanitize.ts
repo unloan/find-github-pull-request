@@ -7,4 +7,8 @@ describe('sanitize', () => {
 
     expect(sanitize(rawString)).toEqual(expected);
   });
+
+  test('ignores undefined', () => {
+    expect(sanitize(undefined)).toEqual(undefined);
+  });
 });

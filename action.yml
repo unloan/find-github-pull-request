@@ -7,18 +7,19 @@ branding:
 inputs:
   token:
     required: false
-    description: Github Token used to make API request to fetch pull requests from the current owner/repo.  Defaults to the built-in token.
+    description: Github Token used to make API request to fetch pull requests from the current owner/repo.
     default: ${{ github.token }}
   commitSha:
     required: false
-    description: Commit SHA to find a PR for.  Finds the correct sha by default, when able.
+    description: Commit SHA to find a PR for. Ignored for a pull_request event.
+    default: ${{ github.sha }}
   allowClosed:
     required: false
-    description: Allow finding closed PRs.  Defaults to false (no).
+    description: Allow finding closed PRs. Ignored for a pull_request event.
     default: 'false'
   failIfNotFound:
     required: false
-    description: SHA to find a PR for.  Defaults to false (failing).
+    description: Fail if no PR with that sha is found.  Ignored for a pull_request event.
     default: 'false'
 
 outputs:
