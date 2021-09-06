@@ -6366,17 +6366,34 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 
 function fetchPullRequest() {
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         const githubToken = (0,core.getInput)('token', { required: true }); // not required in action.yml, but the default should provide
-        const currentSha = (0,core.getInput)('commitSha', { required: true }); // not required in action.yml, but the default should provide
+        let currentSha = (0,core.getInput)('commitSha', { required: false });
         const allowClosed = (0,core.getBooleanInput)('allowClosed', { required: false });
         const shouldFail = (0,core.getBooleanInput)('failIfNotFound', { required: false });
+        let targetNumber;
+        (0,core.debug)(`context.issue.number: ${(_a = github.context.issue) === null || _a === void 0 ? void 0 : _a.number}`);
+        // @ts-ignore
+        (0,core.debug)(`context.pull_request.number: ${(_b = github.context.pull_request) === null || _b === void 0 ? void 0 : _b.number}`);
         // To be honest, it shouldn't be able to fail here, due to `{ required: true }` (etc) above.
         if (!githubToken)
             (0,core.setFailed)('token is required and not provided');
         if (!currentSha)
             (0,core.setFailed)('commitSha is required and not provided');
+        if (github.context.eventName === 'pull_request') {
+            (0,core.debug)('@@context.payload:');
+            (0,core.debug)(JSON.stringify(github.context.payload));
+            currentSha = github.context.payload.head.sha;
+            targetNumber = github.context.payload.pull_request.number;
+        }
         const octokit = (0,github.getOctokit)(githubToken);
+        (0,core.debug)('@@request');
+        (0,core.debug)(JSON.stringify({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            commit_sha: currentSha,
+        }));
         const { data } = yield octokit.rest.repos.listPullRequestsAssociatedWithCommit({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
@@ -6395,6 +6412,10 @@ function fetchPullRequest() {
             return;
         }
         const pullRequest = pullRequests[0];
+        if (targetNumber && pullRequest.number !== targetNumber) {
+            (0,core.setFailed)(`We were looking for PR#${targetNumber}, received PR#${pullRequest.number}.`);
+            return;
+        }
         // Sanitize the title and body to avoid Shell interpolation of backticks and more.
         const title = sanitize(pullRequest.title);
         const body = sanitize(pullRequest.body);
