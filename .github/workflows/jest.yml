@@ -16,4 +16,7 @@ jobs:
 
       - run: yarn install --ignore-optional --frozen-lockfile --non-interactive --check-files
 
+      # not technically a jest suite, but a build should pass too
+      - run: yarn build
+
       - run: yarn jest:ci
