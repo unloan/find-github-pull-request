@@ -2,6 +2,11 @@ name: Comment on Every Pull Request
 
 on: [push, pull_request]
 
+# NOTE: This is possibly insecure; it allows Dependabot to comment on a PR, the point of this run.
+# @see: https://github.blog/changelog/2021-10-06-github-actions-workflows-triggered-by-dependabot-prs-will-respect-permissions-key-in-workflows/
+permissions:
+  pull-requests: write
+
 jobs:
   add-pr-comment:
     runs-on: ubuntu-latest
