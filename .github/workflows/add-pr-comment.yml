@@ -17,7 +17,7 @@ jobs:
         id: find-pr
         uses: ./ # run against self
         with:
-          failIfNotFound: true
+          failIfNotFound: ${{ github.event_name == 'pull_request' }} # Fail for a PR, not for a push
 
       - name: Comment on the found Pull Request
         if: steps.find-pr.outputs.number != ''
