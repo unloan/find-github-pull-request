@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.0.1] - 2021-12-21
+
+- Added Dependabot
+- Additional CI improvements
+- Lots of dependency upgrades
+
 ## [1.0.0] - 2021-09-07
 
 Basically the initial working release.
