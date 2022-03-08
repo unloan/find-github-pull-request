@@ -12,8 +12,7 @@ jest.mock('@actions/core', () => ({
 }));
 
 const runTest = async (
-  { number, eventName }: { number: number; eventName: string },
-  callbackInIsolation?: (arg: any) => void
+  { number, eventName }: { number: number; eventName: string }
 ) => {
   const pullRequest = pullRequestFactory(number);
 
@@ -32,7 +31,8 @@ const runTest = async (
       },
     }));
 
-    if (callbackInIsolation) callbackInIsolation(pullRequest);
+    // Mock the return value from findPullRequestFromSha
+    (findPullRequestFromSha as jest.MockedFunction<any>).mockReturnValue(pullRequest);
 
     const { getPullRequest } = require('../src/getPullRequest');
     await getPullRequest();
@@ -46,39 +46,14 @@ describe('getPullRequest', () => {
     jest.resetAllMocks();
   });
 
-  describe('context.eventName=pull_request', () => {
-    test.each([9000, 2, 44])(
-      'returns the first PR in the array (%p)',
-      async (number) => {
-        expect(setOutputs).not.toHaveBeenCalled();
-
-        // run the test
-        const pullRequest = await runTest({
-          number,
-          eventName: 'pull_request',
-        });
-
-        expect(setOutputs).toHaveBeenCalledTimes(1);
-        expect(setOutputs).toHaveBeenCalledWith(pullRequest);
-
-        expect(findPullRequestFromSha).not.toHaveBeenCalled();
-        expect(setFailed).not.toHaveBeenCalled();
-      }
-    );
-  });
-
-  describe('context.eventName=push', () => {
+  describe.each(['push', 'pull_request'])('context.eventName=%p', (eventName) => {
     test.each([1, 2, 99])('calls findPullRequestFromSha', async (number) => {
       expect(findPullRequestFromSha).not.toHaveBeenCalled();
       expect(setOutputs).not.toHaveBeenCalled();
 
       // run the test
       const pullRequest = await runTest(
-        { number, eventName: 'push' },
-        (pullRequest) =>
-          (findPullRequestFromSha as jest.MockedFunction<any>).mockReturnValue(
-            pullRequest
-          )
+        { number, eventName },
       );
 
       expect(findPullRequestFromSha).toHaveBeenCalledTimes(1);
@@ -89,26 +64,4 @@ describe('getPullRequest', () => {
       expect(setFailed).not.toHaveBeenCalled();
     });
   });
-
-  test.each(['unknown', 'release'])(
-    'context.eventName=%p (etc) calls setFailed',
-    async (eventName) => {
-      expect(setFailed).not.toHaveBeenCalled();
-      expect(setOutputs).not.toHaveBeenCalled();
-
-      // run the test
-      await runTest({ number: 12, eventName });
-
-      expect(setFailed).toHaveBeenCalledTimes(1);
-      expect(setFailed).toHaveBeenCalledWith(
-        `Received an unknown event: ${eventName}.`
-      );
-
-      // Still called though…
-      expect(setOutputs).toHaveBeenCalledTimes(1);
-      expect(setOutputs).toHaveBeenCalledWith(undefined);
-
-      expect(findPullRequestFromSha).not.toHaveBeenCalled();
-    }
-  );
 });

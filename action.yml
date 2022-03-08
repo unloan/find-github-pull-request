@@ -32,6 +32,10 @@ outputs:
     description: The found PR description, sanitized to be used in a shell environment.
   url:
     description: The found PR url.
+  base-ref:
+    description: The found PR's base ref, eg. 'main' or 'master'.
+  base-sha:
+    description: The found PR's base sha ref's sha, eg. 'main' is currently at 'a1b2c3d4f'.
 
 runs:
   using: 'node12'

@@ -34,6 +34,8 @@ jobs:
           echo title: ${{ steps.find-pr.outputs.title }}
           echo body: ${{ steps.find-pr.outputs.body }}
           echo url: ${{ steps.find-pr.outputs.url }}
+          echo url: ${{ steps.find-pr.outputs.base-ref }}
+          echo url: ${{ steps.find-pr.outputs.base-sha }}
 ```
 
 # Inputs
@@ -55,12 +57,14 @@ If doing `on: pull_request`, we get this data directly from the payload and inpu
 
 **NOTE: `title` and `body` are sanitized to remove quotes and backticks to avoid shell interpolation.**
 
-| Name   | Description         | Type or Example Value                                          |
-| ------ | ------------------- | -------------------------------------------------------------- |
-| number | The found PR number | `'12345'`                                                      |
-| title  | The found PR title  | `string`                                                       |
-| body   | The found PR body   | `string`                                                       |
-| url    | The found PR url    | `https://github.com/kylorhall/find-github-pull-request/pull/1` |
+| Name     | Description         | Type or Example Value                                          |
+| -------- | ------------------- | -------------------------------------------------------------- |
+| number   | The found PR number | `'12345'`                                                      |
+| title    | The found PR title  | `string`                                                       |
+| body     | The found PR body   | `string`                                                       |
+| url      | The found PR url    | `https://github.com/kylorhall/find-github-pull-request/pull/1` |
+| base-ref | The base ref        | `'main'`                                                       |
+| base-sha | The base sha        | `'dc45d5195b1f2510b7e83d7cb6a836ba09b2358d'`                                                       |
 
 ---
 

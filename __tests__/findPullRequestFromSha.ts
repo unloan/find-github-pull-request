@@ -87,7 +87,7 @@ describe('findPullRequestFromSha', () => {
 
       expect(result.number).toEqual(number);
       expect(result.html_url).toEqual(
-        `https://github.com/kylorhall/find-github-pull-request/pull/${number}`
+        `https://github.com/octocat/Hello-World/pull/${number}`
       );
     }
   );

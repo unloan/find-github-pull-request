@@ -19,16 +19,32 @@ jobs:
         with:
           failIfNotFound: ${{ github.event_name == 'pull_request' }} # Fail for a PR, not for a push
 
+      # Do not debug the body as it will break things!
+      - name: Debug
+        run: |
+          echo number: ${{ steps.find-pr.outputs.number }}
+          echo url: ${{ steps.find-pr.outputs.url }}
+          echo title: ${{ steps.find-pr.outputs.title }}
+          echo base-ref: ${{ steps.find-pr.outputs.base-ref }}
+          echo base-sha: ${{ steps.find-pr.outputs.base-sha }}
+
       - name: Comment on the found Pull Request
         if: steps.find-pr.outputs.number != ''
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          header: comment # basically a key
+          header: comment # basically a key to reuse the same comment
           number: ${{ steps.find-pr.outputs.number }}
           message: |
             :tada: I added a comment!
 
              - number: ${{ steps.find-pr.outputs.number }}
-             - title: ${{ steps.find-pr.outputs.title }}
-             - body: ${{ steps.find-pr.outputs.body }}
              - url: ${{ steps.find-pr.outputs.url }}
+             - title: ${{ steps.find-pr.outputs.title }}
+             - base-ref: ${{ steps.find-pr.outputs.base-ref }}
+             - base-sha: ${{ steps.find-pr.outputs.base-sha }}
+             
+             <details>
+              <summary>click to view body</summary>
+             
+              ${{ steps.find-pr.outputs.body }}
+            </details>

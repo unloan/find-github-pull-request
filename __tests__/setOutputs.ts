@@ -40,25 +40,20 @@ describe('setOutputs', () => {
 
       setOutputs(pullRequestFactory(number));
 
-      expect(setOutput).toHaveBeenCalledTimes(4);
+      expect(setOutput).toHaveBeenCalledTimes(6);
 
       // NOTE: This is just testing that it returns the first one, nothing to do with the id.
-      expect(setOutput).toHaveBeenCalledWith('number', number);
-      expect(setOutput).toHaveBeenCalledWith(
-        'title',
-        `PR Title for number=${number}`
-      );
-      expect(setOutput).toHaveBeenCalledWith(
-        'body',
-        `PR Body for number=${number}`
-      );
-      expect(setOutput).toHaveBeenCalledWith(
-        'url',
-        `https://github.com/kylorhall/find-github-pull-request/pull/${number}`
-      );
+      expect((setOutput as jest.Mock).mock.calls).toEqual([
+        ['number', number],
+        ['title', `PR Title for number=${number}`],
+        ['body', `PR Body for number=${number}`],
+        ['url', `https://github.com/octocat/Hello-World/pull/${number}`],
+        ['base-ref', 'master'],
+        ['base-sha', '6dcb09b5b57875f334f61aebed695e2e4193db5e'],
+      ]);
 
       expect(setFailed).not.toHaveBeenCalled();
-      expect(debug).not.toHaveBeenCalled();
+      expect(debug).toHaveBeenNthCalledWith(1, 'Setting outputs for a Pull Request');
     }
   );
 
@@ -100,12 +95,16 @@ describe('setOutputs', () => {
 
     setOutputs({ number: 42 } as any);
 
-    expect(setOutput).toHaveBeenCalledTimes(4);
+    expect(setOutput).toHaveBeenCalledTimes(6);
 
-    expect(setOutput).toHaveBeenCalledWith('number', 42); // technically it's called as a string
-    expect(setOutput).toHaveBeenCalledWith('title', '');
-    expect(setOutput).toHaveBeenCalledWith('body', '');
-    expect(setOutput).toHaveBeenCalledWith('url', '');
+    expect((setOutput as jest.Mock).mock.calls).toEqual([
+      ['number', 42], // technically it's set as a string
+      ['title', ''],
+      ['body', ''],
+      ['url', ''],
+      ['base-ref', ''],
+      ['base-sha', ''],
+    ]);
 
     expect(setFailed).not.toHaveBeenCalled();
   });

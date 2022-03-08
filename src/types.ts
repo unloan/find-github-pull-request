@@ -1,3 +1,4 @@
-import type { context as ContextType } from '@actions/github';
+import type { components } from '@octokit/openapi-types';
 
-export type PullRequest = typeof ContextType['payload']['pull_request'];
+/** This comes from `listPullRequestsAssociatedWithCommit`, but it's deeply nested…just as easy to pull it out. */
+export type PullRequest = components["schemas"]["pull-request-simple"];
