@@ -17,7 +17,7 @@
   },
   "scripts": {
     "start": "$(yarn bin ncc) run src/run.ts",
-    "build": "$(yarn bin ncc) build src/run.ts",
+    "build": "yarn jest && $(yarn bin ncc) build src/run.ts",
     "jest": "NODE_ENV=test $(yarn bin jest)",
     "jest:ci": "yarn jest --runInBand --ci --colors --collectCoverage",
     "jest:tdd": "yarn jest --watch --verbose"
