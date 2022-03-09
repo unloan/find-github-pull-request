@@ -8750,8 +8750,8 @@ const fetchPRByNumber = () => __awaiter(void 0, void 0, void 0, function* () {
     const octokit = (0,github.getOctokit)(githubToken);
     const number = github.context.payload.pull_request.number;
     const { data: pullRequest } = yield octokit.rest.pulls.get({
-        owner: "octokit",
-        repo: "rest.js",
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
         pull_number: number,
     });
     if (!pullRequest) {

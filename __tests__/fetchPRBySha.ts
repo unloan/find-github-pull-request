@@ -57,6 +57,8 @@ export const runTest = async (
   expect(getOctokit).toHaveBeenCalledWith(inputObj.token || '');
 
   expect(apiMock).toHaveBeenCalledTimes(1);
+  // These are mocked in our `@actions/github.context`:
+  expect(apiMock).toHaveBeenCalledWith({ owner: 'kylorhall', repo: 'repo', commit_sha: inputObj.commitSha || '' });
 
   // Delete all `process.env.INPUT_PACKAGE` we just set.
   deleteMockedInputs();

@@ -15,8 +15,8 @@ export const fetchPRByNumber = async (): Promise<PullRequest | undefined> => {
 
   const number = context.payload.pull_request.number;
   const { data: pullRequest } = await octokit.rest.pulls.get({
-    owner: "octokit",
-    repo: "rest.js",
+    owner: context.repo.owner,
+    repo: context.repo.repo,
     pull_number: number,
   });
 
