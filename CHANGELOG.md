@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.1.0] - 2022-03-09
+
+ - [#95](https://github.com/sharesight/find-github-pull-request/pull/96) & [#96](https://github.com/sharesight/find-github-pull-request/pull/96) = Returning new outputs: `base-ref` and `base-sha`.
+    - This required additional functionality to fetch a full `pull_request` object via API, meaning `inputs.token` is now required.
+
 ## [1.0.1] - 2021-12-21
 
 - Added Dependabot

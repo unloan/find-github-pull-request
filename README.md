@@ -20,7 +20,7 @@ jobs:
 
       - name: Find Pull Request
         id: find-pr
-        uses: kylorhall/find-github-pull-request@v1.0.1
+        uses: kylorhall/find-github-pull-request@1.1.0
         with:
           # These are all default values.
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -84,9 +84,8 @@ yarn jest:tdd
 
 1. Deicde on a semver, eg. `1.2.3`.
 2. Bump this version in `package.json` file—just for the sake of it.
-3. Bump this version in `.github/workflows/add-pr-comment.yml` file.
 4. Bump this version in `README.md` file.
-5. Run `yarn build` and commit that `dist/index.js` change.
+5. Ensure that `yarn build` already has been ran and a `dist/index.js` committed; commit if not.
 6. Version bumps should go via a PR and be merged into _master_ before releasing.
 
 #### Create the Release
