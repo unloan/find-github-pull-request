@@ -1,11 +1,13 @@
 import { setFailed } from '@actions/core';
 
-import { findPullRequestFromSha } from '../src/findPullRequestFromSha';
+import { fetchPRBySha } from '../src/fetchPRBySha';
 import { setOutputs } from '../src/setOutputs';
 
 import { pullRequestFactory } from '../jestHelpers';
+import { fetchPRByNumber } from '../src/fetchPRByNumber';
 
-jest.mock('../src/findPullRequestFromSha');
+jest.mock('../src/fetchPRBySha');
+jest.mock('../src/fetchPRByNumber');
 jest.mock('../src/setOutputs');
 jest.mock('@actions/core', () => ({
   setFailed: jest.fn(),
@@ -31,8 +33,9 @@ const runTest = async (
       },
     }));
 
-    // Mock the return value from findPullRequestFromSha
-    (findPullRequestFromSha as jest.MockedFunction<any>).mockReturnValue(pullRequest);
+    // Mock the PRs returned by the Github API
+    (fetchPRBySha as jest.MockedFunction<any>).mockReturnValue(pullRequest);
+    (fetchPRByNumber as jest.MockedFunction<any>).mockReturnValue(pullRequest);
 
     const { getPullRequest } = require('../src/getPullRequest');
     await getPullRequest();
@@ -46,22 +49,45 @@ describe('getPullRequest', () => {
     jest.resetAllMocks();
   });
 
-  describe.each(['push', 'pull_request'])('context.eventName=%p', (eventName) => {
-    test.each([1, 2, 99])('calls findPullRequestFromSha', async (number) => {
-      expect(findPullRequestFromSha).not.toHaveBeenCalled();
+  describe('context.eventName=push', () => {
+    test.each([1, 2, 99])('calls fetchPRBySha', async (number) => {
+      expect(fetchPRBySha).not.toHaveBeenCalled();
       expect(setOutputs).not.toHaveBeenCalled();
 
       // run the test
       const pullRequest = await runTest(
-        { number, eventName },
+        { number, eventName: 'push' },
       );
 
-      expect(findPullRequestFromSha).toHaveBeenCalledTimes(1);
+      expect(fetchPRBySha).toHaveBeenCalledTimes(1);
+      expect(fetchPRBySha).toHaveBeenCalledWith();
 
       expect(setOutputs).toHaveBeenCalledTimes(1);
       expect(setOutputs).toHaveBeenCalledWith(pullRequest);
 
       expect(setFailed).not.toHaveBeenCalled();
+      expect(fetchPRByNumber).not.toHaveBeenCalled(); // never called
+    });
+  });
+
+  describe('context.eventName=pull_request', () => {
+    test.each([1, 2, 99])('calls fetchPRByNumber', async (number) => {
+      expect(fetchPRByNumber).not.toHaveBeenCalled();
+      expect(setOutputs).not.toHaveBeenCalled();
+
+      // run the test
+      const pullRequest = await runTest(
+        { number, eventName: 'pull_request' },
+      );
+
+      expect(fetchPRByNumber).toHaveBeenCalledTimes(1);
+      expect(fetchPRByNumber).toHaveBeenCalledWith();
+
+      expect(setOutputs).toHaveBeenCalledTimes(1);
+      expect(setOutputs).toHaveBeenCalledWith(pullRequest);
+
+      expect(setFailed).not.toHaveBeenCalled();
+      expect(fetchPRBySha).not.toHaveBeenCalled(); // never called
     });
   });
 });

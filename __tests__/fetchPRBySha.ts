@@ -1,8 +1,9 @@
 import { debug, setFailed, setOutput } from '@actions/core';
 import { getOctokit } from '@actions/github';
 
-import { findPullRequestFromSha } from '../src/findPullRequestFromSha';
+import { fetchPRBySha } from '../src/fetchPRBySha';
 import { pullRequestFactory, setMockedInputs } from '../jestHelpers';
+import { PullRequest } from '../src/types';
 
 export const baseInputs = {
   failIfNotFound: 'false',
@@ -32,7 +33,7 @@ jest.mock('@actions/github', () => ({
 
 export const runTest = async (
   inputs: object | undefined,
-  apiData: object[]
+  apiData: PullRequest[]
 ) => {
   // We first put all of our inputs into `process.env.INPUT_…` (etc).
   const inputObj = { ...baseInputs, ...inputs };
@@ -50,7 +51,7 @@ export const runTest = async (
     },
   }));
 
-  const result = await findPullRequestFromSha();
+  const result = await fetchPRBySha();
 
   expect(getOctokit).toHaveBeenCalledTimes(1);
   expect(getOctokit).toHaveBeenCalledWith(inputObj.token || '');
@@ -63,7 +64,7 @@ export const runTest = async (
   return { apiMock, result };
 };
 
-describe('findPullRequestFromSha', () => {
+describe('fetchPRBySha', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -92,8 +93,8 @@ describe('findPullRequestFromSha', () => {
     }
   );
 
-  test.each(['token', 'commitSha'])(
-    'fails when called withput inputs.%p',
+  test.each(['commitSha'])(
+    'fails when called without inputs.%p',
     async (key) => {
       await runTest({ [key]: undefined }, []);
 

@@ -1,12 +1,22 @@
-import { findPullRequestFromSha } from './findPullRequestFromSha';
+import { setFailed } from '@actions/core';
+import { context } from '@actions/github';
+
+import { fetchPRByNumber } from './fetchPRByNumber';
+import { fetchPRBySha } from './fetchPRBySha';
 import { setOutputs } from './setOutputs';
+import { PullRequest } from './types';
 
 export const getPullRequest = async (): Promise<void> => {
-  /**
-   * Fetch the pull request from the current context's sha.
-   * This is wrapped in another helper function to make testing and debugging easier.
-   */
-  const pullRequest = await findPullRequestFromSha();
+  let pullRequest: PullRequest | undefined;
 
+  if (context.eventName === 'pull_request') {
+    pullRequest = await fetchPRByNumber();
+  } else if (context.eventName === 'push') {
+    pullRequest = await fetchPRBySha();
+  } else {
+    setFailed(`Received an unknown event: ${context.eventName}.`);
+  }
+
+  // NOTE: handling of undefined values 
   setOutputs(pullRequest);
 };

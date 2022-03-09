@@ -1,7 +1,7 @@
 import { sanitize } from '../src/sanitize';
 
 describe('sanitize', () => {
-  test.each([`'`, `"`, `\``])('sanitizes out a character=%p', (char) => {
+  test.each([`'`, `"`, `\``, '(', ')', '[', ']'])('sanitizes out a character=%p', (char) => {
     const rawString = `Change ${char}some value${char} to be 42!`;
     const expected = 'Change some value to be 42!';
 

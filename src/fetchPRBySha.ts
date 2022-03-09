@@ -1,8 +1,11 @@
 import { debug, getInput, getBooleanInput, setFailed } from '@actions/core';
 import { getOctokit, context } from '@actions/github';
 
-export const findPullRequestFromSha = async () => {
-  const githubToken = getInput('token', { required: false }); // not required unless for a search
+/**
+ * Fetch the pull request using a commit sha.
+ */
+export const fetchPRBySha = async () => {
+  const githubToken = getInput('token', { required: true });
   const allowClosed = getBooleanInput('allowClosed', { required: false });
   const failIfNotFound = getBooleanInput('failIfNotFound', { required: false });
   const currentSha = getInput('commitSha', { required: false });
@@ -11,7 +14,7 @@ export const findPullRequestFromSha = async () => {
   if (!githubToken) setFailed('token is required and not provided');
   if (!currentSha) setFailed('commitSha is required and not provided');
 
-  const octokit = getOctokit(githubToken as string);
+  const octokit = getOctokit(githubToken);
 
   const { data } =
     await octokit.rest.repos.listPullRequestsAssociatedWithCommit({
