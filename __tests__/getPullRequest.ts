@@ -49,14 +49,14 @@ describe('getPullRequest', () => {
     jest.resetAllMocks();
   });
 
-  describe('context.eventName=push', () => {
+  describe.each(['push', 'workflow_run'])('context.eventName=%p', (eventName) => {
     test.each([1, 2, 99])('calls fetchPRBySha', async (number) => {
       expect(fetchPRBySha).not.toHaveBeenCalled();
       expect(setOutputs).not.toHaveBeenCalled();
 
       // run the test
       const pullRequest = await runTest(
-        { number, eventName: 'push' },
+        { number, eventName },
       );
 
       expect(fetchPRBySha).toHaveBeenCalledTimes(1);

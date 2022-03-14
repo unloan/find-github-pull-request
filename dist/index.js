@@ -8873,10 +8873,11 @@ const getPullRequest = () => getPullRequest_awaiter(void 0, void 0, void 0, func
     if (github.context.eventName === 'pull_request') {
         pullRequest = yield fetchPRByNumber();
     }
-    else if (github.context.eventName === 'push') {
+    else if (github.context.eventName === 'push' || github.context.eventName === 'workflow_run') {
         pullRequest = yield fetchPRBySha();
     }
     else {
+        // TODO: Should this just try a sha for all events…?
         (0,core.setFailed)(`Received an unknown event: ${github.context.eventName}.`);
     }
     // NOTE: handling of undefined values 
