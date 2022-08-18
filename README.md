@@ -4,7 +4,7 @@ This Github Actions helps find a Pull Request in the context of a `push` or `pul
 
 ## Example Workflow
 
-For a real-world action, this repo runs itself via [add-pr-comment.yml](https://github.com/kylorhall/find-github-pull-request/blob/main/.github/workflows/add-pr-comment.yml) to comment on every PR.
+For a real-world action, this repo runs itself via [add-pr-comment.yml](https://github.com/sharesight/find-github-pull-request/blob/main/.github/workflows/add-pr-comment.yml) to comment on every PR.
 
 ```yaml
 name: Add PR Comment
@@ -20,7 +20,7 @@ jobs:
 
       - name: Find Pull Request
         id: find-pr
-        uses: kylorhall/find-github-pull-request@1.1.2
+        uses: sharesight/find-github-pull-request@1.1.2
         with:
           # These are all default values.
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -62,7 +62,7 @@ If doing `on: pull_request`, we get this data directly from the payload and inpu
 | number   | The found PR number | `'12345'`                                                      |
 | title    | The found PR title  | `string`                                                       |
 | body     | The found PR body   | `string`                                                       |
-| url      | The found PR url    | `https://github.com/kylorhall/find-github-pull-request/pull/1` |
+| url      | The found PR url    | `https://github.com/sharesight/find-github-pull-request/pull/1` |
 | base-ref | The base ref        | `'main'`                                                       |
 | base-sha | The base sha        | `'dc45d5195b1f2510b7e83d7cb6a836ba09b2358d'`                                                       |
 
@@ -90,7 +90,7 @@ yarn jest:tdd
 
 #### Create the Release
 
-Manually build a New Release: [here](https://github.com/kylorhall/find-github-pull-request/releases/new)
+Manually build a New Release: [here](https://github.com/sharesight/find-github-pull-request/releases/new)
 
 1. Enter your tag based on the semver.
    - Your tag should be prepended with a `v`, eg. `v1.2.3`.

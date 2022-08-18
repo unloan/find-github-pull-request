@@ -10,10 +10,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kylorhall/find-github-pull-request.git"
+    "url": "git+https://github.com/sharesight/find-github-pull-request.git"
   },
   "bugs": {
-    "url": "https://github.com/kylorhall/find-github-pull-request/issues"
+    "url": "https://github.com/sharesight/find-github-pull-request/issues"
   },
   "scripts": {
     "start": "$(yarn bin ncc) run src/run.ts",

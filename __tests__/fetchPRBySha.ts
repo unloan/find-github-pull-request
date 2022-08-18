@@ -24,7 +24,7 @@ jest.mock('@actions/github', () => ({
   context: {
     eventName: 'push',
     repo: {
-      owner: 'kylorhall',
+      owner: 'sharesight',
       repo: 'repo',
     },
   },
@@ -58,7 +58,7 @@ export const runTest = async (
 
   expect(apiMock).toHaveBeenCalledTimes(1);
   // These are mocked in our `@actions/github.context`:
-  expect(apiMock).toHaveBeenCalledWith({ owner: 'kylorhall', repo: 'repo', commit_sha: inputObj.commitSha || '' });
+  expect(apiMock).toHaveBeenCalledWith({ owner: 'sharesight', repo: 'repo', commit_sha: inputObj.commitSha || '' });
 
   // Delete all `process.env.INPUT_PACKAGE` we just set.
   deleteMockedInputs();
@@ -161,7 +161,7 @@ describe('fetchPRBySha', () => {
 
       expect(setOutput).not.toHaveBeenCalled();
       expect(setFailed).toHaveBeenCalledWith(
-        'No pull requests found for kylorhall/repo@dc45d51, Github Action failed.'
+        'No pull requests found for sharesight/repo@dc45d51, Github Action failed.'
       );
     });
   });
