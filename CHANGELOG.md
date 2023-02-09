@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.2.0] - 2023-02-09
+
+ - Several dependency upgrades including Github actions, which deprecates Node 12 actions.
+
 ## [1.1.2] - 2022-03-14
 
  - [#101](https://github.com/sharesight/find-github-pull-request/pull/101) - Fetch the PR for an eventName of 'workflow_run'

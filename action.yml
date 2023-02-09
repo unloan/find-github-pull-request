@@ -38,5 +38,5 @@ outputs:
     description: The found PR's base sha ref's sha, eg. 'main' is currently at 'a1b2c3d4f'.
 
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'dist/index.js'

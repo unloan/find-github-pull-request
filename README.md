@@ -20,7 +20,7 @@ jobs:
 
       - name: Find Pull Request
         id: find-pr
-        uses: sharesight/find-github-pull-request@1.1.2
+        uses: sharesight/find-github-pull-request@1.2.0
         with:
           # These are all default values.
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -82,11 +82,12 @@ yarn jest:tdd
 
 #### Prepare Build
 
-1. Deicde on a semver, eg. `1.2.3`.
+1. Decide on a semver, eg. `1.2.3`.
 2. Bump this version in `package.json` file—just for the sake of it.
 4. Bump this version in `README.md` file.
-5. Ensure that `yarn build` already has been ran and a `dist/index.js` committed; commit if not.
-6. Version bumps should go via a PR and be merged into _master_ before releasing.
+5. Update the `CHANGELOG.md` file with relevant release information.
+6. Ensure that `yarn build` already has been ran and a `dist/index.js` committed; commit if not.
+7. Version bumps should go via a PR and be merged into _master_ before releasing.
 
 #### Create the Release
 
