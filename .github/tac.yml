@@ -1,0 +1,12 @@
+project: unloan/find-github-pull-request
+
+# Additional repositories related to your project
+repos:
+- unloan/find-github-pull-request
+
+# Files and folders to send to TAC for review
+include:
+- README.md
+
+# Can be also be a glob pattern, example:
+# - docs/**
